@@ -6,7 +6,7 @@ A simple Node.js scraper that pulls data on Messier objects from the [Wikipedia 
 
 ## Overview
 
-The Messier catalogue is a list of 110 astronomical objects — galaxies, nebulae, and star clusters — compiled by Charles Messier in the 18th century. This script scrapes the Wikipedia summary table for each object's identifier, type, distance, and apparent magnitude, and saves the results locally as `messier_data.csv`.
+The Messier catalogue is a list of 110 astronomical objects: galaxies, nebulae, and star clusters, compiled by Charles Messier. This script scrapes the Wikipedia summary table for each object's identifier, type, distance, and apparent magnitude, and saves the results locally as `messier_data.csv`.
 
 ---
 
