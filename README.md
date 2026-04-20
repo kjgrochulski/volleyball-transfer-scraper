@@ -61,30 +61,12 @@ Output is written to `messier_data.csv` in the project root. The console will co
 ## Known Limitations
 
 - **Wikipedia dependency** — The scraper targets a specific table structure on a Wikipedia page. If that page's markup changes, column extraction will break silently and produce shifted or empty data.
-- **Column index fragility** — Fields are selected by hard-coded index (`columns[0]`, `columns[1]`, etc.). There is currently a bug caused by this: the Messier number column in Wikipedia is rendered as a `<th>` element rather than `<td>`, so `find('td')` skips it and all subsequent columns are off by one. See [Known Bug](#known-bug) below.
+- **Column index fragility** — Fields are selected by hard-coded index (`columns[0]`, `columns[1]`, etc.). If Wikipedia's table structure changes, extraction will break silently.
 - **No data validation** — Values are written as raw strings. Ranges (e.g. `4.9–8.1`), comma-formatted numbers, and em-dashes are preserved as-is rather than normalised.
 - **No pagination or rate limiting** — This is a single-page scrape; no throttling logic is needed or implemented.
 - **Static snapshot** — The output reflects the state of the Wikipedia page at the time of the run. It is not updated automatically.
 
----
 
-## Known Bug
-
-The Messier Number column on Wikipedia uses a `<th>` tag rather than `<td>`. Because the script selects only `td` elements, the first column is skipped and every subsequent index is off by one. As a result, the `Messier Number` output column actually contains NGC identifiers, and the `NGC Number` column contains common names.
-
-**Fix:** change the column selector from:
-
-```javascript
-const columns = $(this).find('td')
-```
-
-to:
-
-```javascript
-const columns = $(this).find('td, th')
-```
-
----
 
 ## Dependencies
 
@@ -101,7 +83,3 @@ const columns = $(this).find('td, th')
 | nodemon | Auto-restarts the process on file changes during development |
 
 ---
-
-## License
-
-ISC

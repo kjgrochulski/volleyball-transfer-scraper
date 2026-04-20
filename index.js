@@ -29,7 +29,7 @@ axios.get(url, {
     const cleanText = (text) => text.replace(/\[.*?\]/g, '').replace(/\n/g, '').trim()
 
     $('table.wikitable tbody tr').each(function () {
-        const columns = $(this).find('td')
+        const columns = $(this).find('td, th')
 
         if (columns.length > 0) {
             
