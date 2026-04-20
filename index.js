@@ -55,6 +55,9 @@ axios.get(url, {
         .then(() => {
             console.log('Success! Your messier_data.csv file has been created.')
         })
+        .catch(error => {
+            console.error('CSV write error:', error.message)
+        })
 })
 .catch(error => {
     console.error("Scraping error:", error.message)
