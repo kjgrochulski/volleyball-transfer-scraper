@@ -1,64 +1,64 @@
-const axios = require('axios')
-const cheerio = require('cheerio')
-const createCsvWriter = require('csv-writer').createObjectCsvWriter
+const puppeteer = require('puppeteer');
+const cheerio = require('cheerio');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
 const csvWriter = createCsvWriter({
-    path: 'messier_data.csv',
+    path: 'transfers_2026.csv',
     header: [
-        { id: 'messierId', title: 'Messier Number' },
-        { id: 'ngcId', title: 'NGC Number' },
-        { id: 'objectType', title: 'Object Type' },
-        { id: 'distance', title: 'Distance (kly)' },
-        { id: 'magnitude', title: 'Apparent Magnitude' }
+        { id: 'Player', title: 'Player Name' },
+        { id: 'Team_from', title: 'Transfer Origin' },
+        { id: 'Team_to', title: 'Transfer Destination' },
+        { id: 'Details', title: 'Details' }
     ]
-})
+});
 
-const url = 'https://en.wikipedia.org/wiki/List_of_Messier_objects'
+(async () => {
+    const browser = await puppeteer.launch({ 
+        headless: "new"
+    });
+    const page = await browser.newPage();
 
-axios.get(url, {
-    headers: {
-        'User-Agent': 'MessierProject'
-    }
-})
-.then(response => {
-    const html = response.data
-    const $ = cheerio.load(html)
-    const scrapedData = []
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36');
 
-    //cleaner 
-    const cleanText = (text) => text.replace(/\[.*?\]/g, '').replace(/\n/g, '').trim()
+    console.log('Navigating to Volleybox...');
+    try {
+        await page.goto('https://volleybox.net/transfers/2026-27/ALL/1', {
+            waitUntil: 'networkidle2',
+        });
 
-    $('table.wikitable tbody tr').each(function () {
-        const columns = $(this).find('td, th')
+        const content = await page.content();
+        const $ = cheerio.load(content);
+        const scrapedData = [];
 
-        if (columns.length > 0) {
-            
-            const messierId = cleanText($(columns[0]).text())
-            const ngcId = cleanText($(columns[1]).text())
-            const objectType = cleanText($(columns[3]).text())
-            const distance = cleanText($(columns[4]).text())
-            const magnitude = cleanText($(columns[6]).text())
+        console.log('Parsing data...');
 
-            scrapedData.push({
-                messierId: messierId,
-                ngcId: ngcId,
-                objectType: objectType,
-                distance: distance,
-                magnitude: magnitude
-            })
+        $('.transfer_row').each(function () {
+            const row = $(this);
+            const player = row.find('.player .text_link').text().trim();
+            const team_from = row.attr('data-club-from-name') || 'Unknown';
+            const team_to = row.attr('data-club-to-name') || 'Unknown';
+            const details = row.find('.player .desc').text().trim();
+
+            if (player) {
+                scrapedData.push({
+                    Player: player,
+                    Team_from: team_from,
+                    Team_to: team_to,
+                    Details: details
+                });
+            }
+        });
+
+        if (scrapedData.length > 0) {
+            await csvWriter.writeRecords(scrapedData);
+            console.log(`Successfully saved ${scrapedData.length} records!`);
+        } else {
+            console.log('No data found. Check if selectors changed.');
         }
-    })
 
-    console.log(`Successfully parsed ${scrapedData.length} rows of data.`)
-
-    csvWriter.writeRecords(scrapedData)
-        .then(() => {
-            console.log('Success! Your messier_data.csv file has been created.')
-        })
-        .catch(error => {
-            console.error('CSV write error:', error.message)
-        })
-})
-.catch(error => {
-    console.error("Scraping error:", error.message)
-})
+    } catch (error) {
+        console.error('Error during scraping:', error.message);
+    } finally {
+        await browser.close();
+    }
+})();
