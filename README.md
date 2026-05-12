@@ -6,7 +6,6 @@ A scraping pipeline that pulls professional volleyball player transfers from [Vo
 
 <p align="center">
   <img width="354" height="628" alt="Screenshot 2026-05-12 at 3 11 06 PM" src="https://github.com/user-attachments/assets/bd1762d8-93e3-4946-9236-177d54e5f1fd" />
-"
 </p>
 
 ## What It Does
