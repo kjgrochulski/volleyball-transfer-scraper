@@ -30,9 +30,6 @@ const csvWriter = createCsvWriter({
             timeout: 30000,
         });
 
-        // FIX 1: Wait for AJAX-injected rows to actually appear in the DOM
-        // before grabbing page.content(). Without this, Cheerio may parse
-        // an empty table.
         await page.waitForSelector('.transfer_row', { timeout: 15000 });
 
         const content = await page.content();
@@ -44,17 +41,12 @@ const csvWriter = createCsvWriter({
         $('.transfer_row').each(function () {
             const row = $(this);
 
-            // FIX 2: Use the data attributes for club names (already correct),
-            // but scope the player link to .player to avoid matching the
-            // club .text_link anchors that also live inside the row.
             const player  = row.find('.player .text_link').first().text().trim();
 
-            // These data attributes sit on .transfer_row itself — reliable.
             const team_from = row.attr('data-club-from-name') || 'Unknown';
             const team_to   = row.attr('data-club-to-name')   || 'Unknown';
 
-            // FIX 3: Explicitly target .player's .desc so we never
-            // accidentally pick up a club's country line.
+            // explicitly target .player's .desc
             const details = row.find('.player .desc').first().text().trim();
 
             if (player) {
