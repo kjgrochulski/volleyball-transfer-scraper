@@ -1,6 +1,6 @@
 # Volleyball Transfer Tracker
 
-A scraping pipeline that pulls professional volleyball player transfers from [Volleybox](https://volleybox.net/transfers) twice a day and renders them on the macOS desktop as a live, filterable Übersicht widget. Each player name links out to their Volleybox profile.
+A scraping pipeline that pulls professional volleyball player transfers from [Volleybox](https://volleybox.net/transfers) twice a day and renders them on the macOS desktop as a live, filterable Übersicht widget. Each player name links to their Volleybox profile.
 
 ---
 
@@ -10,11 +10,11 @@ A scraping pipeline that pulls professional volleyball player transfers from [Vo
 
 ## What It Does
 
-1. A scheduled `launchd` job runs the scraper at noon and 7pm Eastern. The scraper drives a headless Chromium instance through `puppeteer-extra` (with the Stealth plugin to get past Volleybox's Cloudflare gate), then POSTs directly to Volleybox's internal AJAX endpoint to paginate through both confirmed transfers ("Done Deals") and unconfirmed ones ("Rumors").
+1. A scheduled `launchd` job runs the scraper twice daily. The scraper drives a headless Chromium instance through `puppeteer-extra` with the Stealth plugin to get past Volleybox's Cloudflare gate, then POSTs directly to Volleybox's internal AJAX endpoint to paginate through both confirmed transfers and rumors.
 
 2. Results are deduplicated, normalized into a single record shape, and written to `output/transfers.csv` (for spreadsheet use) and `output/transfers.json` (for the widget).
 
-3. The Übersicht widget reads `transfers.json` on a 5-minute refresh cycle and renders the list on the desktop with two filters — confirmed/rumor status and country — plus clickable player names that open Volleybox profiles in the default browser via `open`.
+3. The Übersicht widget reads `transfers.json` and renders the list on the desktop with two filters: confirmed/rumor status and country. Player names open to Volleybox profiles in the default browser via `open`.
 
 ---
 
