@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Scraped output (regenerated each run)
+output/
+
+# Debug artifacts
+debug_dump.html
+debug_*.png
+*.log
+
+# Legacy output from earlier Wikipedia/Messier scraper
+messier_data.csv
+transfers_2026*.csv
+
+# macOS
+.DS_Store
+
+# Editor / OS
+.vscode/
+.idea/
+.Rhistory
