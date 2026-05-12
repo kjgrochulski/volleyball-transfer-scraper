@@ -120,11 +120,7 @@ The widget side followed a similar arc. The first version was just `JSON.stringi
 ## Repo Structure
 
 ```
-├── indexapp.js                       # Current scraper (production)
-├── index.js                          # Single-page, cleaned-up intermediate version
-├── indexstealth.js                   # Stealth + timestamped CSV
-├── indexOLD.js                       # First Stealth/Cloudflare-aware version
-├── index2.js                         # Earliest Volleybox attempt
+├── indexapp.js                       # Current scraper
 ├── debug.js                          # HTML dump for diagnosing empty scrapes
 ├── transfers.jsx                     # Übersicht widget (symlinked into ~/Library/Application Support/Übersicht/widgets/)
 ├── run_scraper.sh                    # launchd wrapper (sets PATH, logs)
