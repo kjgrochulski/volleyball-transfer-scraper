@@ -29,13 +29,13 @@ A scraping pipeline that pulls professional volleyball player transfers from [Vo
 | **Schedule** | macOS `launchd` (`com.kgrochulski.scraper.plist`), fires 12:00 and 19:00 local time |
 | **Widget** | `transfers.jsx` — Übersicht stateful widget |
 
-The scraper opens a real browser tab to establish a Volleybox session (cookies, anti-bot headers), then performs the actual data fetches from inside the page context using `page.evaluate(fetch(...))`. This bypasses the standard Cloudflare problem where a bare `axios` request gets a "Just a moment…" page instead of HTML.
+The scraper opens a real browser tab to establish a Volleybox session (cookies, anti-bot headers), then performs the actual data fetches from inside the page context using `page.evaluate(fetch(...))`.
 
-Each transfer row is parsed for player name, origin team, destination team, league, status, and a "Details" string that includes position and nationality (e.g. "Setter from Italy"). The widget later parses the nationality back out of that string for the country filter.
+Each transfer row is parsed for player name, origin team, destination team, league, status, and a "Details" string that includes position and nationalit. The widget later parses the nationality back out of that string for the country filter.
 
 **Note**
 
-Volleybox returns roughly 20 rows per AJAX request. Scraping 60 of each category means three sequential POSTs per category, with an 800–1300ms randomized delay between pages to avoid hammering the server. If a category returns fewer rows than the target (e.g. early in the transfer season), the scraper stops at whatever's available rather than retrying.
+Volleybox returns roughly 20 rows per AJAX request. Scraping 60 of each category means three sequential POSTs per category, with an 800–1300ms randomized delay between pages to avoid hammering the server. If a category returns fewer rows than the target (for early in the transfer season), the scraper stops at whatever's available rather than retrying.
 
 ---
 
