@@ -3,8 +3,10 @@
 A scraping pipeline that pulls professional volleyball player transfers from [Volleybox](https://volleybox.net/transfers) twice a day and renders them on the macOS desktop as a live, filterable Übersicht widget. Each player name links out to their Volleybox profile.
 
 ---
-<img width="354" height="628" alt="Screenshot 2026-05-12 at 3 11 06 PM" src="https://github.com/user-attachments/assets/f70f1f7e-18fb-406e-bdcb-e1336a361239" />
 
+<p align="center">
+  <img width="500" height="310" alt="ss" src="https://github.com/user-attachments/assets/292a3696-d487-4ead-9989-dff2a464fd86](https://github.com/user-attachments/assets/f70f1f7e-18fb-406e-bdcb-e1336a361239" />
+</p>
 
 ## What It Does
 
