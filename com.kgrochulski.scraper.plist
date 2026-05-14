@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.kgrochulski.scraper</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/zsh</string>
+        <string>-c</string>
+        <string>/Users/karolgrochulski/Development/scraper/run_scraper.sh</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/karolgrochulski/Development/scraper</string>
+
+    <!-- Runs at noon and 7pm local time-->
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict>
+            <key>Hour</key>
+            <integer>12</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+        <dict>
+            <key>Hour</key>
+            <integer>19</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+    </array>
+
+    <!--or runs as soon as mac wakes -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/karolgrochulski/Development/scraper/output/logs/launchd.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/karolgrochulski/Development/scraper/output/logs/launchd.err.log</string>
+</dict>
+</plist>
