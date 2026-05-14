@@ -49,9 +49,7 @@ Volleybox returns roughly 20 rows per AJAX request. Scraping 60 of each category
 | `SET_COUNTRY` | Filter by league of origin **or** player nationality |
 | `TOGGLE_COUNTRY` | Open/close the custom country dropdown |
 
-Native `<select>` elements don't work in Übersicht widgets — the window lives at the desktop level and can't become "key," so native popup menus never open. The status filter uses three pill buttons; the country filter uses a custom-rendered dropdown with state-tracked open/closed state.
-
-Player names that have a Volleybox profile are rendered as `<a>` elements with an `onClick` that calls `run("open " + JSON.stringify(url))`, imported from `uebersicht`. This shells out to macOS `open`, which respects the user's default browser. Without `e.preventDefault()`, the embedded WebKit would try to navigate the widget itself.
+Player names with an associated Volleybox profile are rendered as `<a>` elements with an `onClick` that calls `run("open " + JSON.stringify(url))`. This shells out to macOS `open`, which uses the user's default browser. Without `e.preventDefault()`, the embedded WebKit would try to navigate the widget itself.
 
 ---
 
@@ -59,7 +57,7 @@ Player names that have a Volleybox profile are rendered as `<a>` elements with a
 
 The scraper does not run inside Übersicht (which would tie it to the widget refresh cycle). Instead, a `launchd` LaunchAgent runs it as a standalone job at 12:00 and 19:00 local time. The plist points at a `run_scraper.sh` wrapper that:
 
-- Sets `PATH` to include the nvm-managed Node binary (launchd doesn't source `.zshrc`)
+- Sets `PATH` to include the nvm-managed Node binary
 - Changes into the project directory
 - Pipes stdout/stderr into a timestamped log under `output/logs/`
 - Keeps only the 20 most recent log files
@@ -76,34 +74,27 @@ If the Mac is asleep at a scheduled fire time, `launchd` will run the job as soo
 
 ## Project Evolution
 
-The folder started life as a Wikipedia table scraper for [Messier objects](https://en.wikipedia.org/wiki/List_of_Messier_objects) — `axios` + `cheerio` writing a single CSV. The pivot to Volleybox happened in the middle of the project and exposed every layer of complexity that a static-HTML scrape doesn't have to think about. Each `index*.js` file in the repo is a checkpoint of that walk.
+The project started as a simple Wikipedia table scraper, with `axios` + `cheerio` writing a single CSV. The change to Volleybox happened in the middle of the project and exposed a layer of complexity that a static-HTML scrape doesn't have to think about. Each file is an iteration of the final scraper:
 
 | File | What changed |
 |---|---|
-| `index2.js` | First Volleybox attempt. Plain `puppeteer`, single page, broad selectors. Worked locally but matched both player and club anchors in each row, producing garbage output. |
-| `debug.js` | Diagnostic. Dumps the full rendered HTML to disk and counts occurrences of keywords like `cloudflare`, `transfer_row`. Used whenever a scrape returned zero rows. |
-| `indexOLD.js` | Added `puppeteer-extra` + Stealth plugin to defeat Cloudflare's bot check. Added explicit `waitForSelector('.transfer_row')` before parsing — the prior version raced the AJAX render and parsed an empty table. Added a Cloudflare-detection branch that exits early instead of producing empty CSVs. |
-| `indexstealth.js` | Timestamped output filenames so consecutive runs don't overwrite each other. |
-| `index.js` | Cleaned-up single-page version with explicit `FIX 1/2/3` comments documenting each parsing trap (`.first()` to avoid club anchors, `.player .desc` scoping, etc.). |
-| `indexapp.js` | **Current.** Drops the single-page model entirely. Opens one browser tab to bootstrap session cookies, then uses `page.evaluate` to POST directly to `/ajax/get_transfers/<page>` from inside the page context. Paginates through both `Done Deal` and `Rumor` categories until 60 rows are collected per category. Dedupes on `Player|Team_from|Team_to`. Writes both CSV and JSON, where the JSON payload includes an `updated` timestamp and a `count`. |
+|#1 `index2.js` | First Volleybox scrape attempt. Plain `puppeteer`, single page, broad selectors. Worked locally but matched both player and club anchors in each row, producing nonsense output. |
+|#2 `index3.js` | Added `puppeteer-extra` + Stealth plugin to defeat Cloudflare's bot check. Added explicit `waitForSelector('.transfer_row')` before parsing — the prior version raced the AJAX render and parsed an empty table. Added a Cloudflare-detection branch that exits early instead of producing empty CSVs. |
+|#3 `indexstealth.js` | Timestamped output filenames so consecutive runs don't overwrite each other. |
+|#4 `indexstealth2.js` | Cleaned-up single-page version with explicit `FIX 1/2/3` comments documenting each parsing trap (`.first()` to avoid club anchors, `.player .desc` scoping, etc.). |
+|#5 `indexapp.js` | **Current.** Drops the single-page model entirely. Opens one browser tab to bootstrap session cookies, then uses `page.evaluate` to POST directly to `/ajax/get_transfers/<page>` from inside the page context. Paginates through both `Done Deal` and `Rumor` categories until 60 rows are collected per category. Dedupes on `Player|Team_from|Team_to`. Writes both CSV and JSON, where the JSON payload includes an `updated` timestamp and a `count`. |
 
-The widget side followed a similar arc. The first version was just `JSON.stringify(transfers)` dumped to the desktop in plain text — which is how the project got started. The current version is the third rewrite: pills + custom dropdown + clickable links + filter state persisted across data refreshes.
+The widget side followed a similar arc. The first version was just `JSON.stringify(transfers)` dumped to the desktop in plain text. The current version is the third rewrite with pills + custom dropdown + clickable links + filter state persisted across data refreshes.
 
 ---
 
 ## Known Limitations
 
-**Cloudflare drift.** Volleybox sits behind Cloudflare. The Stealth plugin defeats the current bot check, but Cloudflare updates its fingerprinting periodically. When a run fails with `title === "Just a moment…"` the scraper exits early. If this becomes a regular failure, the next layer would be `playwright` or `puppeteer-real-browser`.
-
-**Selector fragility.** Field extraction depends on Volleybox's current DOM structure: `.transfer_row`, `.player .text_link`, `data-club-from-name`, `span.desc.dBlock`, etc. If Volleybox restructures the transfers page, parsing breaks silently and produces empty CSV/JSON. The widget would then display "No matches" with the previous `updated` timestamp untouched, so check the launchd logs rather than the widget when output looks stale.
+**Selector fragility.** Field extraction depends on Volleybox's current DOM structure: `.transfer_row`, `data-club-from-name`, etc. If Volleybox restructures the transfers page, parsing breaks silently and produces empty CSV/JSON.
 
 **Destination country isn't captured.** The scraped `League` field reflects the origin team's league, not the destination's. The widget's country filter matches against `League` and player nationality (parsed from the `Details` string), which covers "where the player came from" but not "where they're going." Adding destination country would mean a second scrape against each destination team's page.
 
-**Rumor accuracy.** "Rumor" entries are exactly what they sound like — they reflect what someone has reported, not what's signed. About a third of any given snapshot will resolve into different outcomes than the rumor suggested. The widget badges them in amber to keep this visually distinct from confirmed transfers.
-
-**Schedule timezone.** The plist's `StartCalendarInterval` fires at the Mac's local hour 12 and 19. If the Mac timezone is set to Eastern, that's noon and 7pm ET as intended. Travelling with the laptop and changing timezones shifts the schedule with the Mac.
-
-**Übersicht permissions.** First-run Übersicht installs sometimes need Full Disk Access granted in System Settings → Privacy & Security before the widget's `cat` command can read files under `~/Development/`. Symptoms: widget shows "No output from cat" or a blank loading state indefinitely.
+**Übersicht permissions issue.** First-run Übersicht installs sometimes need Full Disk Access granted in System Settings → Privacy & Security before the widget's `cat` command can read files under `~/Development/`.
 
 ---
 
