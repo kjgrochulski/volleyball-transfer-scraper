@@ -10,7 +10,7 @@ A scraping pipeline that pulls professional volleyball player transfers from [Vo
 
 ## What It Does
 
-1. A scheduled `launchd` job runs the scraper twice daily. The scraper drives a headless Chromium instance through `puppeteer-extra` with the Stealth plugin to get past Volleybox's Cloudflare gate, then POSTs directly to Volleybox's internal AJAX endpoint to paginate through both confirmed transfers and rumors.
+1. A scheduled `launchd` job runs the scraper twice daily. The scraper drives a headless Chromium instance through `puppeteer-extra` with the Stealth plugin to bypass Volleybox's Cloudflare gate, then POSTs directly to Volleybox's internal AJAX endpoint to paginate through both confirmed transfers and rumors.
 
 2. Results are deduplicated, normalized into a single record shape, and written to `output/transfers.csv` (for spreadsheet use) and `output/transfers.json` (for the widget).
 
@@ -35,7 +35,7 @@ Each transfer row is parsed for player name, origin team, destination team, leag
 
 **Note**
 
-Volleybox returns roughly 20 rows per AJAX request. Scraping 60 of each category means three sequential POSTs per category, with an 800–1300ms randomized delay between pages to avoid hammering the server. If a category returns fewer rows than the target (for early in the transfer season), the scraper stops at whatever's available rather than retrying.
+Volleybox returns roughly 20 rows per AJAX request. Scraping 60 of each category means three sequential POSTs per category, with 800–1300ms randomized delay between pages. If a category returns fewer rows than the target (for early in the transfer season), the scraper stops at whatever's available.
 
 ---
 
@@ -126,8 +126,8 @@ The widget side followed a similar arc. The first version was just `JSON.stringi
 ```
 ├── indexapp.js                       # Current scraper
 ├── debug.js                          # HTML dump for diagnosing empty scrapes
-├── transfers.jsx                     # Übersicht widget (symlinked into ~/Library/Application Support/Übersicht/widgets/)
-├── run_scraper.sh                    # launchd wrapper (sets PATH, logs)
+├── transfers.jsx                     # Übersicht widget
+├── run_scraper.sh                    # launchd wrapper
 ├── com.kgrochulski.scraper.plist     # LaunchAgent definition
 ├── output/
 │   ├── transfers.csv                 # Latest scrape, CSV
@@ -148,7 +148,7 @@ npm install
 node indexapp.js
 ```
 
-This writes `output/transfers.csv` and `output/transfers.json`. To install the schedule:
+writes `output/transfers.csv` and `output/transfers.json`. To install the schedule:
 
 ```bash
 chmod +x run_scraper.sh
@@ -156,10 +156,10 @@ cp com.kgrochulski.scraper.plist ~/Library/LaunchAgents/
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.kgrochulski.scraper.plist
 ```
 
-To install the widget, symlink `transfers.jsx` into Übersicht's widgets folder so future edits hot-reload automatically:
+To install the widget, symlink `transfers.jsx` into Übersicht's widgets folder:
 
 ```bash
 ln -s "$(pwd)/transfers.jsx" ~/Library/Application\ Support/Übersicht/widgets/transfers.jsx
 ```
 
-Then launch Übersicht. The widget appears top-right by default; adjust `top` / `right` / `width` in `transfers.jsx`'s `className` to taste.
+Then launch Übersicht
