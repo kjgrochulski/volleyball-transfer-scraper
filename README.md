@@ -117,6 +117,7 @@ The widget side followed a similar arc. The first version was just `JSON.stringi
 ```
 ├── indexapp.js                       # Current scraper
 ├── debug.js                          # HTML dump for diagnosing empty scrapes
+├── Demo.mp4                          # Simple demonstration video showing user interactions with widget
 ├── transfers.jsx                     # Übersicht widget
 ├── run_scraper.sh                    # launchd wrapper
 ├── com.kgrochulski.scraper.plist     # LaunchAgent definition
