@@ -92,9 +92,7 @@ The widget side followed a similar arc. The first version was just `JSON.stringi
 
 **Selector fragility.** Field extraction depends on Volleybox's current DOM structure: `.transfer_row`, `data-club-from-name`, etc. If Volleybox restructures the transfers page, parsing breaks silently and produces empty CSV/JSON.
 
-**Destination country isn't captured.** The scraped `League` field reflects the origin team's league, not the destination's. The widget's country filter matches against `League` and player nationality (parsed from the `Details` string), which covers "where the player came from" but not "where they're going." Adding destination country would mean a second scrape against each destination team's page.
-
-**Übersicht permissions issue.** First-run Übersicht installs sometimes need Full Disk Access granted in System Settings → Privacy & Security before the widget's `cat` command can read files under `~/Development/`.
+**Destination country isn't captured.** The scraped `League` field reflects the origin team's league, but not the destination's. The widget's country filter matches against `League` and player nationality, which covers "where the player came from" but not "where they're going." Adding destination country would mean a second scrape against each destination team's page.
 
 ---
 
