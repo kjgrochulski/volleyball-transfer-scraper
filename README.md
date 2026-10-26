@@ -153,3 +153,11 @@ ln -s "$(pwd)/transfers.jsx" ~/Library/Application\ Support/Übersicht/widgets/t
 ```
 
 Then launch Übersicht
+
+## Disclaimer
+
+This project is for personal, non-commercial use. It collects publicly visible
+transfer listings from Volleybox, and the scraped data is not redistributed in
+this repository. The scraper depends on Volleybox's current page structure and
+may stop working if the site changes. Users are responsible for complying with
+Volleybox's terms of service.
