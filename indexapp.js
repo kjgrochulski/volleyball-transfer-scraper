@@ -12,6 +12,13 @@ const SEASON_ID   = 127;
 const GENDER      = 'M';
 const OUTPUT_DIR  = path.join(__dirname, 'output');
 const JSON_OUT    = path.join(OUTPUT_DIR, 'transfers.json');
+// Persistent browser profile so Cloudflare's clearance cookie survives between runs
+const PROFILE_DIR = path.join(__dirname, '.chrome-profile');
+const HEADLESS    = process.env.HEADLESS === '1';
+// Headful runs get longer so there's time to click a Cloudflare checkbox by hand
+const CF_WAIT_MS  = HEADLESS ? 30000 : 120000;
+// Prefer the installed Google Chrome over puppeteer's bundled Chrome for Testing
+const SYSTEM_CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 
 const STATUSES = [
@@ -55,6 +62,26 @@ function parseRows(html, statusLabel) {
     return rows;
 }
 
+
+// "Just a moment..." is Cloudflare's JS challenge, which usually clears itself
+// after a few seconds and reloads the page. Poll the title instead of giving up.
+// If it shows a "Verify you are human" checkbox instead, click it yourself in
+// the Chrome window: the clearance cookie is saved in PROFILE_DIR for later runs.
+async function waitForCloudflare(page) {
+    const start    = Date.now();
+    const deadline = start + CF_WAIT_MS;
+    let   hinted   = false;
+    while (Date.now() < deadline) {
+        const title = (await page.title().catch(() => '')).toLowerCase();
+        if (title && !title.includes('cloudflare') && !title.includes('moment')) return true;
+        if (!HEADLESS && !hinted && Date.now() - start > 10000) {
+            console.log('  Still on Cloudflare — if a "Verify you are human" checkbox is showing, click it in the Chrome window');
+            hinted = true;
+        }
+        await new Promise(r => setTimeout(r, 1000));
+    }
+    return false;
+}
 
 async function fetchPageInBrowser(page, pageNum, type) {
     const html = await page.evaluate(async (pageNum, seasonId, gender, type) => {
@@ -136,27 +163,51 @@ async function scrapeStatus(page, status) {
     });
 
     console.log('Launching browser to establish session...');
+    // Cloudflare blocks headless Chrome outright, so run a real (headful) window.
+    // Set HEADLESS=1 to go back to headless.
     const browser = await puppeteer.launch({
-        headless: 'new',
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        headless: HEADLESS ? 'new' : false,
+        executablePath: fs.existsSync(SYSTEM_CHROME) ? SYSTEM_CHROME : undefined,
+        userDataDir: PROFILE_DIR,
+        // Drops the "controlled by automated test software" banner/flag
+        ignoreDefaultArgs: ['--enable-automation'],
+        args: [
+            // --no-sandbox is only needed on Linux and shows a warning banner on macOS
+            ...(process.platform === 'linux' ? ['--no-sandbox', '--disable-setuid-sandbox'] : []),
+            ...(HEADLESS ? [] : ['--window-size=1280,900']),
+        ],
     });
+    // No setUserAgent here: the stealth plugin already strips "HeadlessChrome"
+    // and keeps the UA consistent with the real browser version and platform.
     const page = await browser.newPage();
-    await page.setUserAgent(
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
-        '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
-    );
 
-    await page.goto('https://volleybox.net/transfers/2026-27/ALL/1', {
-        waitUntil: 'networkidle2',
-        timeout:   30000,
-    });
+    let cleared = false;
+    for (let attempt = 1; attempt <= 3 && !cleared; attempt++) {
+        try {
+            await page.goto('https://volleybox.net/transfers/2026-27/ALL/1', {
+                waitUntil: 'networkidle2',
+                timeout:   30000,
+            });
+        } catch (err) {
+            // e.g. ERR_INTERNET_DISCONNECTED right after the Mac wakes from sleep
+            console.error(`  goto attempt ${attempt}: ${err.message}`);
+            if (/ERR_INTERNET_DISCONNECTED|ERR_NAME_NOT_RESOLVED|ERR_NETWORK_CHANGED/.test(err.message)) {
+                await new Promise(r => setTimeout(r, 20000));
+                continue;
+            }
+        }
 
-    const title = await page.title();
-    if (title.toLowerCase().includes('cloudflare') || title.toLowerCase().includes('moment')) {
+        cleared = await waitForCloudflare(page);
+        if (!cleared) console.log(`  Cloudflare challenge still showing (attempt ${attempt})`);
+    }
+
+    if (!cleared) {
         console.error('✗ Cloudflare block detected — try again in a moment');
         await browser.close();
         process.exit(1);
     }
+
+    await page.waitForNetworkIdle({ idleTime: 500, timeout: 15000 }).catch(() => {});
 
     console.log('Session established\n');
 

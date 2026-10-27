@@ -1,5 +1,5 @@
 {
-  "name": "scraper",
+  "name": "volleyball-transfer-scraper",
   "version": "1.0.0",
   "description": "Scrapes professional volleyball transfers from Volleybox and renders them in an Übersicht widget.",
   "main": "indexapp.js",
@@ -8,16 +8,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kjgrochulski/scraper.git"
+    "url": "git+https://github.com/kjgrochulski/volleyball-transfer-scraper.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Karol Grochulski",
+  "license": "MIT",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/kjgrochulski/scraper/issues"
+    "url": "https://github.com/kjgrochulski/volleyball-transfer-scraper/issues"
   },
-  "homepage": "https://github.com/kjgrochulski/scraper#readme",
+  "homepage": "https://github.com/kjgrochulski/volleyball-transfer-scraper#readme",
   "dependencies": {
     "cheerio": "^1.2.0",
     "csv-writer": "^1.6.0",

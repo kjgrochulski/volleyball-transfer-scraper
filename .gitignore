@@ -20,3 +20,6 @@ transfers_2026*.csv
 .vscode/
 .idea/
 .Rhistory
+
+# Persistent Chrome profile (contains cookies)
+.chrome-profile/

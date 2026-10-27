@@ -1,7 +1,8 @@
 import { run } from "uebersicht"
 
+// Edit this path to where you cloned the repo
 export const command =
-  "cat /Users/karolgrochulski/Development/scraper/output/transfers.json"
+  "cat /path/to/volleyball-transfer-scraper/output/transfers.json"
 
 // Refresh every 5 min
 export const refreshFrequency = 5 * 60 * 1000
