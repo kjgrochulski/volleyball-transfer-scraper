@@ -124,7 +124,8 @@ The widget side followed a similar arc. The first version was just `JSON.stringi
 │   ├── transfers.json                # Latest scrape, widget input
 │   └── logs/                         # Per-run scraper logs (rolled at 20)
 ├── package.json
-└── README.md
+├── README.md
+└── LICENSE
 ```
 
 ---
