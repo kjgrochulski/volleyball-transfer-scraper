@@ -1,0 +1,12 @@
+{
+  "updated": "2026-01-01T12:00:00.000Z",
+  "timestamp": "2026-01-01_12:00",
+  "count": 5,
+  "transfers": [
+    {"Player": "Sample Player One", "PlayerUrl": "https://example.com/sample-player-one", "Team_from": "Example VC A", "Team_to": "Example VC B", "League": "Italy", "Status": "Done Deal", "Details": "Outside Hitter from Italy"},
+    {"Player": "Sample Player Two", "PlayerUrl": "https://example.com/sample-player-two", "Team_from": "Example VC C", "Team_to": "Example VC D", "League": "France", "Status": "Done Deal", "Details": "Setter from France"},
+    {"Player": "Sample Player Three", "PlayerUrl": "https://example.com/sample-player-three", "Team_from": "Example VC E", "Team_to": "Example VC F", "League": "Poland", "Status": "Done Deal", "Details": "Middle-blocker from Poland"},
+    {"Player": "Sample Player Four", "PlayerUrl": "https://example.com/sample-player-four", "Team_from": "Example VC G", "Team_to": "Example VC H", "League": "Brazil", "Status": "Rumor", "Details": "Opposite from Brazil"},
+    {"Player": "Sample Player Five", "PlayerUrl": "https://example.com/sample-player-five", "Team_from": "Example VC I", "Team_to": "Example VC J", "League": "Japan", "Status": "Rumor", "Details": "Libero from Japan"}
+  ]
+}
